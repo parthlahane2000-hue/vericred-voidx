@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { downloadJson, formatDateTime, shortHash } from "@/lib/vericred/format";
+import { contextFromRecord, lookupCredential } from "@/lib/vericred/registry";
 import { useVeriCred } from "@/lib/vericred/store";
 import type { W3CVerifiableCredential, ZKSelectiveDisclosure } from "@/lib/vericred/types";
 import {
@@ -68,7 +69,7 @@ interface Result {
 
 function VerifyPage() {
   const { p: shared } = Route.useSearch();
-  const { credentials, revokedIds, incoming, clearIncoming, recordCheck, checks } = useVeriCred();
+  const { credentials, incoming, clearIncoming, recordCheck, checks } = useVeriCred();
   const [mode, setMode] = useState<Mode>("paste");
   const [text, setText] = useState("");
   const [reference, setReference] = useState("");
@@ -77,8 +78,6 @@ function VerifyPage() {
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const timers = useRef<number[]>([]);
-
-  const ctx = { credentials, revokedIds };
 
   const animate = useCallback((done: () => void) => {
     timers.current.forEach((t) => window.clearTimeout(t));
@@ -100,9 +99,17 @@ function VerifyPage() {
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
   const runProof = useCallback(
-    (p: ZKSelectiveDisclosure) => {
+    async (p: ZKSelectiveDisclosure) => {
       setError(null);
-      const outcome = verifyPresentation(p, ctx);
+      let record;
+      try {
+        record = await lookupCredential(p.credentialId);
+      } catch (e) {
+        setResult(null);
+        setError((e as Error).message);
+        return;
+      }
+      const outcome = verifyPresentation(p, contextFromRecord(record));
       animate(() => {
         setResult({ outcome, presentation: p, kind: "proof" });
         const threshold = p.rangeProofs[0]?.threshold;
@@ -130,8 +137,7 @@ function VerifyPage() {
         );
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [credentials, revokedIds, animate, recordCheck],
+    [animate, recordCheck],
   );
 
   // Proof handed over from the wallet
@@ -139,7 +145,7 @@ function VerifyPage() {
     if (!incoming) return;
     setMode("paste");
     setText(JSON.stringify(incoming, null, 2));
-    runProof(incoming);
+    void runProof(incoming);
     clearIncoming();
   }, [incoming, runProof, clearIncoming]);
 
@@ -151,7 +157,7 @@ function VerifyPage() {
     const p = parsePresentation(shared);
     if (p) {
       setText(JSON.stringify(p, null, 2));
-      runProof(p);
+      void runProof(p);
     } else setError("That share link is damaged. Ask the candidate to send it again.");
   }, [shared, runProof]);
 
@@ -182,13 +188,23 @@ function VerifyPage() {
     reader.readAsText(file);
   };
 
-  const onLookup = () => {
+  const onLookup = async () => {
     setError(null);
     if (!reference.trim()) {
       setError("Enter a credential ID or document ID.");
       return;
     }
-    const { credential, outcome } = verifyByReference(reference, ctx);
+    let record;
+    try {
+      record = await lookupCredential(reference);
+    } catch (e) {
+      setResult(null);
+      setError((e as Error).message);
+      return;
+    }
+    const { credential, outcome } = record
+      ? verifyByReference(reference, contextFromRecord(record))
+      : { credential: null, outcome: null };
     if (!credential || !outcome) {
       setResult(null);
       setError("No credential with that ID is in the registry.");
