@@ -47,6 +47,7 @@ describe("employer verification outcomes", () => {
 describe("issuing a credential", () => {
   const base = {
     studentName: "Priya N. Sundaram",
+    studentEmail: "priya@example.edu",
     studentRollNo: "2021CS1092",
     degreeName: "B.Tech",
     major: "CSE",
@@ -60,5 +61,10 @@ describe("issuing a credential", () => {
   });
   it("rejects a CGPA above 10", () => {
     expect(validateIssueForm({ ...base, cgpa: "10.5" }).cgpa).toBeDefined();
+  });
+  it("requires a student email so the student can find the credential", () => {
+    expect(validateIssueForm({ ...base, studentEmail: "" }).studentEmail).toBeDefined();
+    expect(validateIssueForm({ ...base, studentEmail: "not-an-email" }).studentEmail).toBeDefined();
+    expect(validateIssueForm(base).studentEmail).toBeUndefined();
   });
 });

@@ -36,6 +36,7 @@ type Tab = "registry" | "issue" | "log";
 
 const EMPTY: IssueFormState = {
   studentName: "Priya N. Sundaram",
+  studentEmail: "",
   studentRollNo: "2021CS1092",
   degreeName: "Bachelor of Technology (B.Tech)",
   major: "Computer Science and Engineering",
@@ -106,11 +107,11 @@ function IssuerPortal({ userId, email }: { userId: string; email: string }) {
     refreshStatuses();
   };
   const issue = useMutation({
-    mutationFn: (c: W3CVerifiableCredential) => issueToRegistry(c, userId),
-    onSuccess: (_d, c) => {
+    mutationFn: (v: { credential: W3CVerifiableCredential; email: string }) => issueToRegistry(v.credential, userId, v.email),
+    onSuccess: (_d, { credential: c }) => {
       addToWallet(c);
       refresh();
-      toast.success(`Issued to ${c.credentialSubject.studentName}. It's now in the registry and the student wallet.`);
+      toast.success(`Issued to ${c.credentialSubject.studentName}. They can see it in the student portal now.`);
       setTab("registry");
     },
     onError: (e) => toast.error((e as Error).message),
@@ -279,7 +280,7 @@ function IssuerPortal({ userId, email }: { userId: string; email: string }) {
           <IssueForm
             nextIndex={200 + registry.length}
             busy={issue.isPending}
-            onIssue={(c) => issue.mutate(c)}
+            onIssue={(credential, email) => issue.mutate({ credential, email })}
           />
         )}
 
@@ -329,7 +330,7 @@ function IssuerPortal({ userId, email }: { userId: string; email: string }) {
   );
 }
 
-function IssueForm({ nextIndex, busy, onIssue }: { nextIndex: number; busy: boolean; onIssue: (c: W3CVerifiableCredential) => void }) {
+function IssueForm({ nextIndex, busy, onIssue }: { nextIndex: number; busy: boolean; onIssue: (c: W3CVerifiableCredential, email: string) => void }) {
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [attachment, setAttachment] = useState<string>("");
@@ -346,7 +347,7 @@ function IssueForm({ nextIndex, busy, onIssue }: { nextIndex: number; busy: bool
     const errs = validateIssueForm(form);
     setErrors(errs);
     if (Object.keys(errs).length) return;
-    onIssue(buildCredential(form, nextIndex));
+    onIssue(buildCredential(form, nextIndex), form.studentEmail.trim());
   };
 
   const field = (k: keyof FormState, label: string, opts: { span?: string; inputMode?: "decimal" | "numeric" } = {}) => (
@@ -371,6 +372,7 @@ function IssueForm({ nextIndex, busy, onIssue }: { nextIndex: number; busy: bool
       <form onSubmit={submit} noValidate className="col-span-12 min-w-0 lg:col-span-7">
         <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
           {field("studentName", "Student's full name")}
+          {field("studentEmail", "Student's email (they sign in with it)")}
           {field("studentRollNo", "Roll / registration no.")}
           {field("degreeName", "Degree")}
           {field("major", "Specialisation")}
