@@ -7,6 +7,13 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  vite: {
+    // Pre-bundle client libraries up front so a late dependency discovery can't
+    // re-optimise mid-session and load a second copy of React in an open tab.
+    optimizeDeps: {
+      include: ["qrcode.react", "recharts", "sonner", "lucide-react", "@radix-ui/react-dialog", "@radix-ui/react-slider", "@radix-ui/react-switch"],
+    },
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
