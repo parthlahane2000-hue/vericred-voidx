@@ -546,7 +546,7 @@ function VerifyPage() {
         </div>
 
         <Notice title="About these checks" className="mt-16 max-w-3xl">
-          Signature and proof checks here are a transparent simulation against demo records. No DigiLocker or
+          Records and revocation status come from the live registry database. Signature and proof checks are a transparent simulation. No DigiLocker or
           blockchain service is contacted.
         </Notice>
 
