@@ -151,7 +151,7 @@ function ExplainerPage() {
                     <h2 className="mt-2 text-4xl">{t.title}</h2>
                     <p className="mt-4 text-lg leading-relaxed">{t.plain}</p>
                     <p className="mt-4 border-l-2 border-accent pl-4 text-sm leading-relaxed text-muted-foreground">
-                      <span className="kicker mr-2">Think of it as</span>
+                      <span className="kicker mb-1 block">Think of it as</span>
                       {t.id === "dl" ? <span className="datum">{t.example}</span> : t.example}
                     </p>
                   </div>

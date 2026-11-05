@@ -284,35 +284,41 @@ function Finding({ a, n, active, onSelect }: { a: DocumentForgeryAnomaly; n: num
 }
 
 function SpecimenCertificate({ report, specimen }: { report: ForgeryForensicReport | null; specimen: SpecimenDocument | null }) {
+  // Elements sit at fixed percentages so the specimen findings' boxes land on them.
+  const at = (x: number, y: number, w: number, h: number) => ({ left: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` });
+  const degree = specimen?.category === "Skill Credential" ? "Expert certification" : "Bachelor of Technology";
   return (
-    <div className="aspect-[4/3] bg-card p-3 font-display text-foreground select-none">
-      <div className="flex h-full flex-col justify-between border-4 border-double border-accent-ink/50 px-6 py-5">
-        <div className="text-center">
-          <div className="mx-auto flex size-10 items-center justify-center rounded-full border border-accent-ink text-[10px] tracking-widest text-accent-ink">
-            ★
-          </div>
-          <p className="mt-2 text-sm uppercase tracking-[0.18em] sm:text-base">{report?.institutionDetected ?? specimen?.institution}</p>
-          <p className="text-[10px] italic text-muted-foreground">Established by Act of Parliament</p>
-        </div>
-        <div className="text-center">
-          <p className="text-[11px] italic text-muted-foreground">This is to certify that</p>
-          <p className="mt-1 text-xl sm:text-2xl">{report?.candidateNameDetected ?? "—"}</p>
-          <p className="mt-1 text-[11px] italic text-muted-foreground">has been admitted to the degree of</p>
-          <p className="mt-1 text-sm uppercase tracking-[0.14em]">Bachelor of Technology</p>
-          <p className="mt-2 font-mono text-[10px]">CGPA {report?.cgpaOrGradeDetected ?? "—"}</p>
-        </div>
-        <div className="flex items-end justify-between text-[10px]">
-          <div className="text-center">
-            <p className="italic">R. Sengupta</p>
-            <p className="border-t border-foreground/40 pt-1 font-sans">Registrar</p>
-          </div>
-          <div className="flex size-10 items-center justify-center rounded-full border border-dashed border-accent-ink font-sans text-[8px] tracking-widest text-accent-ink">
-            SEAL
-          </div>
-          <div className="text-center">
-            <p className="italic">V. K. Murthy</p>
-            <p className="border-t border-foreground/40 pt-1 font-sans">Vice-Chancellor</p>
-          </div>
+    <div className="@container relative aspect-[4/3] select-none bg-card font-display text-foreground">
+      <div className="absolute inset-[2.5%] border-4 border-double border-accent-ink/50" />
+      <div className="absolute flex flex-col items-center justify-center text-center" style={at(12, 6, 64, 18)}>
+        <p className="text-[3.4cqw] uppercase leading-tight tracking-[0.16em]">{report?.institutionDetected ?? specimen?.institution}</p>
+        <p className="mt-[0.6cqw] text-[1.9cqw] italic text-muted-foreground">Established by Act of Parliament</p>
+      </div>
+      <div className="absolute grid grid-cols-5 grid-rows-5 gap-[0.4cqw] p-[0.8cqw]" style={at(81, 15, 13, 16)} aria-hidden>
+        {Array.from({ length: 25 }, (_, i) => (
+          <span key={i} className={cn("bg-foreground", [1, 3, 6, 7, 9, 12, 14, 17, 18, 20, 23].includes(i) && "bg-transparent")} />
+        ))}
+      </div>
+      <p className="absolute text-center text-[2cqw] italic text-muted-foreground" style={at(20, 32, 60, 5)}>This is to certify that</p>
+      <p className="absolute text-center text-[4.6cqw] leading-none" style={at(15, 39, 70, 8)}>{report?.candidateNameDetected ?? "—"}</p>
+      <p className="absolute text-center text-[2.6cqw] uppercase tracking-[0.14em]" style={at(15, 50, 70, 5)}>{degree}</p>
+      <p className="absolute flex items-center justify-center text-center font-mono text-[2.1cqw]" style={at(42, 57, 22, 8)}>
+        CGPA {(report?.cgpaOrGradeDetected ?? "—").split(" ")[0]}
+      </p>
+      <p className="absolute flex items-center justify-center font-sans text-[1.8cqw] text-muted-foreground" style={at(36, 67, 32, 8)}>
+        Awarded {report?.verdict === "SUSPICIOUS" ? "14 Mar 2026" : "20 Jul 2024"}
+      </p>
+      <div className="absolute flex flex-col items-center justify-end text-center" style={at(12, 79, 26, 13)}>
+        <p className="text-[2.4cqw] italic">R. Sengupta</p>
+        <p className="mt-[0.6cqw] w-full border-t border-foreground/40 pt-[0.6cqw] font-sans text-[1.7cqw]">Registrar</p>
+      </div>
+      <div className="absolute flex flex-col items-center justify-end text-center" style={at(44, 79, 24, 13)}>
+        <p className="text-[2.4cqw] italic">V. K. Murthy</p>
+        <p className="mt-[0.6cqw] w-full border-t border-foreground/40 pt-[0.6cqw] font-sans text-[1.7cqw]">Vice-Chancellor</p>
+      </div>
+      <div className="absolute flex items-center justify-center" style={at(76, 71, 17, 21)}>
+        <div className="flex aspect-square h-full items-center justify-center rounded-full border border-dashed border-accent-ink font-sans text-[1.6cqw] tracking-widest text-accent-ink">
+          SEAL
         </div>
       </div>
     </div>

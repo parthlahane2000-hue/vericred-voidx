@@ -497,7 +497,7 @@ export const SAMPLE_SPECIMENS: SpecimenDocument[] = [
           type: 'METADATA_INCONSISTENCY',
           severity: 'HIGH',
           description: 'Date stamp metadata was altered in PDF XMP properties 4 hours ago, conflicting with issuer issuance schedule.',
-          location: { x: 55, y: 75, width: 35, height: 12 },
+          location: { x: 36, y: 66, width: 32, height: 10 },
         },
       ],
       forensicChecklist: {

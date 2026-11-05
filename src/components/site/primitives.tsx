@@ -103,6 +103,7 @@ export function Monogram({ text, className }: { text: string; className?: string
       className={cn(
         "inline-flex size-12 shrink-0 items-center justify-center rounded-full border border-foreground/70 font-display text-sm tracking-wide",
         className,
+        text.length >= 4 && "text-[10px] tracking-normal",
       )}
       aria-hidden
     >

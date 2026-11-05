@@ -145,7 +145,7 @@ function IssuerPage() {
                       <td className="py-4 pr-4 font-mono text-xs">#{r.statusListIndex}</td>
                       <td className="py-4 pr-4">
                         <p>{r.studentName}</p>
-                        <p className="datum text-muted-foreground">{r.docId}</p>
+                        <p className="whitespace-nowrap font-mono text-xs text-muted-foreground">{r.docId}</p>
                       </td>
                       <td className="py-4 pr-4">{r.degreeName}</td>
                       <td className="py-4 pr-4">
