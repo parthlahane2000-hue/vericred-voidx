@@ -7,17 +7,17 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-const safePath = (p: unknown) => (typeof p === "string" && p.startsWith("/") && !p.startsWith("//") ? p : "/issuer");
+const safePath = (p: unknown) => (typeof p === "string" && p.startsWith("/") && !p.startsWith("//") ? p : "/student");
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>): { redirect?: string } =>
     typeof s["redirect"] === "string" ? { redirect: s["redirect"] } : {},
   head: () => ({
     meta: [
-      { title: "Registrar staff sign-in — VeriCred" },
-      { name: "description", content: "University staff sign in to issue and revoke academic credentials." },
-      { property: "og:title", content: "Registrar staff sign-in — VeriCred" },
-      { property: "og:description", content: "Sign in to the university portal." },
+      { title: "Sign in — VeriCred" },
+      { name: "description", content: "Students sign in to see their issued credentials. University staff sign in to issue and revoke them." },
+      { property: "og:title", content: "Sign in — VeriCred" },
+      { property: "og:description", content: "Sign in to the student portal or the university portal." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -29,6 +29,7 @@ function AuthPage() {
   const { redirect } = Route.useSearch();
   const navigate = useNavigate();
   const target = safePath(redirect);
+  const staff = target.startsWith("/issuer");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,7 +58,7 @@ function AuthPage() {
       const { data, error: err } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        options: { emailRedirectTo: `${window.location.origin}${target}` },
+        options: { emailRedirectTo: `${window.location.origin}${target}`, data: { signup_as: staff ? "staff" : "student" } },
       });
       setBusy(false);
       if (err) return setError(err.message);
@@ -70,12 +71,21 @@ function AuthPage() {
     <Container className="py-20">
       <div className="grid grid-cols-12 gap-x-4 md:gap-x-8 gap-y-12">
         <div className="col-span-12 min-w-0 lg:col-span-5">
-          <SectionLabel>University portal</SectionLabel>
-          <h1 className="mt-4 text-5xl leading-tight">Registrar staff only.</h1>
+          <SectionLabel>{staff ? "University portal" : "Student portal"}</SectionLabel>
+          <h1 className="mt-4 text-5xl leading-tight">{staff ? "Registrar staff only." : "See what's on record for you."}</h1>
           <p className="mt-6 max-w-md text-muted-foreground">
-            Issuing and revoking credentials changes what every employer sees. Sign in with your staff account.
+            {staff
+              ? "Issuing and revoking credentials changes what every employer sees. Sign in with your staff account."
+              : "Use the email address your university has for you. You'll see every credential issued to it, and whether any has been revoked."}{" "}
             Employers don't need an account to check a credential.
           </p>
+          <button
+            type="button"
+            onClick={() => void navigate({ to: "/auth", search: { redirect: staff ? "/student" : "/issuer" }, replace: true })}
+            className="mt-6 text-sm underline decoration-accent decoration-2 underline-offset-4"
+          >
+            {staff ? "I'm a student" : "I'm university staff"}
+          </button>
         </div>
 
         <div className="col-span-12 min-w-0 lg:col-span-5 lg:col-start-8">
@@ -92,7 +102,7 @@ function AuthPage() {
                 {(
                   [
                     ["signin", "Sign in"],
-                    ["signup", "Create staff account"],
+                    ["signup", staff ? "Create staff account" : "Create account"],
                   ] as const
                 ).map(([m, label]) => (
                   <button
@@ -136,7 +146,7 @@ function AuthPage() {
               </div>
             </form>
           )}
-          {mode === "signup" && !sent && (
+          {staff && mode === "signup" && !sent && (
             <Notice title="Approval" className="mt-6">
               New accounts can issue credentials only after the registrar approves them.
             </Notice>

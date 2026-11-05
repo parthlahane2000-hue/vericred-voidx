@@ -115,7 +115,7 @@ export async function listEvents(): Promise<RegistryEventRow[]> {
   }));
 }
 
-export async function issueToRegistry(c: W3CVerifiableCredential, userId: string) {
+export async function issueToRegistry(c: W3CVerifiableCredential, userId: string, studentEmail: string) {
   const { verificationHistory: _omit, ...document } = c;
   const { error } = await supabase.from("issued_credentials").insert({
     credential_id: c.id,
@@ -127,6 +127,7 @@ export async function issueToRegistry(c: W3CVerifiableCredential, userId: string
     status_list_index: c.credentialStatus.statusListIndex,
     document: JSON.parse(JSON.stringify(document)),
     issued_by: userId,
+    student_email: studentEmail.trim().toLowerCase(),
   });
   if (error) throw new Error(error.code === "23505" ? "A credential with that document ID already exists." : "Couldn't save the credential.");
 }
@@ -137,4 +138,16 @@ export async function setRevokedInRegistry(credentialId: string, revoked: boolea
     .update(revoked ? { is_revoked: true, revocation_reason: reason ?? null } : { is_revoked: false })
     .eq("credential_id", credentialId);
   if (error) throw new Error("Couldn't update the registry.");
+}
+
+/* ---------- Students: their own credentials (matched to their sign-in email by access rules) ---------- */
+
+export async function listMyCredentials(email: string): Promise<RegistryRecord[]> {
+  const { data, error } = await supabase
+    .from("issued_credentials")
+    .select("document, is_revoked, revocation_reason, revoked_at")
+    .eq("student_email", email.trim().toLowerCase())
+    .order("created_at", { ascending: false });
+  if (error) throw new Error("Couldn't load your credentials.");
+  return (data ?? []).map((r) => parseLookup(r)).filter((r): r is RegistryRecord => r !== null);
 }

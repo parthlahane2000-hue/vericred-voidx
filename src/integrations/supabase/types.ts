@@ -29,6 +29,7 @@ export type Database = {
           revoked_at: string | null
           revoked_by: string | null
           status_list_index: number
+          student_email: string | null
           student_name: string
         }
         Insert: {
@@ -45,6 +46,7 @@ export type Database = {
           revoked_at?: string | null
           revoked_by?: string | null
           status_list_index?: number
+          student_email?: string | null
           student_name: string
         }
         Update: {
@@ -61,6 +63,7 @@ export type Database = {
           revoked_at?: string | null
           revoked_by?: string | null
           status_list_index?: number
+          student_email?: string | null
           student_name?: string
         }
         Relationships: []

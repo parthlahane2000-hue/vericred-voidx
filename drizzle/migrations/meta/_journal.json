@@ -8,6 +8,13 @@
       "when": 1793894170685,
       "tag": "0000_credential_registry",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793895088135,
+      "tag": "0001_student_portal",
+      "breakpoints": true
     }
   ]
 }

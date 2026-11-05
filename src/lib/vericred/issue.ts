@@ -3,6 +3,7 @@ import { sha256Hex } from "./zkp";
 
 export interface IssueFormState {
   studentName: string;
+  studentEmail: string;
   studentRollNo: string;
   degreeName: string;
   major: string;
@@ -17,6 +18,8 @@ export type IssueErrors = Partial<Record<keyof IssueFormState, string>>;
 export function validateIssueForm(f: IssueFormState): IssueErrors {
   const e: IssueErrors = {};
   if (f.studentName.trim().length < 2 || f.studentName.trim().length > 80) e.studentName = "Enter the student's full name.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.studentEmail.trim()) || f.studentEmail.trim().length > 254)
+    e.studentEmail = "Enter the student's email. They sign in with it to see this credential.";
   if (!/^[A-Za-z0-9/_-]{4,30}$/.test(f.studentRollNo.trim())) e.studentRollNo = "4–30 letters, digits, / - or _.";
   if (f.degreeName.trim().length < 3) e.degreeName = "Enter the degree title.";
   if (f.major.trim().length < 2) e.major = "Enter the specialisation.";
