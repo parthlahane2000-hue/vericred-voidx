@@ -1,22 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { INITIAL_CREDENTIALS, INITIAL_REVOCATION_REGISTRY } from "./demo-data";
+import { INITIAL_CREDENTIALS } from "./demo-data";
+import { fetchRevokedIds } from "./registry";
 import type {
-  RevocationRegistryItem,
   VerificationAuditEntry,
   W3CVerifiableCredential,
   ZKSelectiveDisclosure,
 } from "./types";
 import type { VerificationStatus } from "./verify";
-
-export interface RegistryEvent {
-  id: string;
-  at: string;
-  credentialId: string;
-  studentName: string;
-  action: "ISSUED" | "REVOKED" | "RESTORED";
-  note?: string | undefined;
-}
 
 export interface EmployerCheck {
   id: string;
@@ -37,9 +29,8 @@ export interface ForensicScan {
 }
 
 interface State {
+  /** The student's wallet copies. Revocation state always comes from the database. */
   credentials: W3CVerifiableCredential[];
-  registry: RevocationRegistryItem[];
-  events: RegistryEvent[];
   checks: EmployerCheck[];
   scans: ForensicScan[];
 }
@@ -49,28 +40,17 @@ interface Store extends State {
   incoming: ZKSelectiveDisclosure | null;
   sendToVerifier: (p: ZKSelectiveDisclosure) => void;
   clearIncoming: () => void;
-  issueCredential: (c: W3CVerifiableCredential) => void;
-  setRevoked: (credentialId: string, revoked: boolean, reason?: string) => void;
+  addToWallet: (c: W3CVerifiableCredential) => void;
+  refreshStatuses: () => void;
   recordCheck: (c: Omit<EmployerCheck, "id" | "at">, audit?: VerificationAuditEntry) => void;
   recordScan: (s: Omit<ForensicScan, "id" | "at">) => void;
   resetDemo: () => void;
 }
 
-const STORAGE_KEY = "vericred:state:v1";
+const STORAGE_KEY = "vericred:state:v2";
 
 const initialState = (): State => ({
   credentials: INITIAL_CREDENTIALS,
-  registry: INITIAL_REVOCATION_REGISTRY,
-  events: [
-    {
-      id: "ev-seed-1",
-      at: "2024-02-14T08:30:00Z",
-      credentialId: "urn:uuid:fa3b21c4-1189-42b8-a76f-c91834720921",
-      studentName: "Aarav Sharma",
-      action: "REVOKED",
-      note: "Academic audit: duplicate examination roll number",
-    },
-  ],
   checks: [],
   scans: [],
 });
@@ -90,7 +70,7 @@ export function VeriCredProvider({ children }: { children: ReactNode }) {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as State;
-        if (Array.isArray(parsed.credentials) && Array.isArray(parsed.registry)) setState(parsed);
+        if (Array.isArray(parsed.credentials)) setState({ credentials: parsed.credentials, checks: parsed.checks ?? [], scans: parsed.scans ?? [] });
       }
     } catch {
       /* ignore a corrupt copy and keep demo data */
@@ -107,54 +87,18 @@ export function VeriCredProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
-  const issueCredential = useCallback((c: W3CVerifiableCredential) => {
-    setState((s) => ({
-      ...s,
-      credentials: [c, ...s.credentials],
-      registry: [
-        {
-          id: uid("rev"),
-          credentialId: c.id,
-          studentName: c.credentialSubject.studentName,
-          degreeName: `${c.credentialSubject.degreeName} (${c.digiLockerMetadata.orgName})`,
-          docId: c.digiLockerMetadata.docId,
-          statusListIndex: c.credentialStatus.statusListIndex,
-          isRevoked: false,
-        },
-        ...s.registry,
-      ],
-      events: [
-        { id: uid("ev"), at: new Date().toISOString(), credentialId: c.id, studentName: c.credentialSubject.studentName, action: "ISSUED" },
-        ...s.events,
-      ],
-    }));
+  const addToWallet = useCallback((c: W3CVerifiableCredential) => {
+    setState((s) => (s.credentials.some((x) => x.id === c.id) ? s : { ...s, credentials: [c, ...s.credentials] }));
   }, []);
 
-  const setRevoked = useCallback((credentialId: string, revoked: boolean, reason?: string) => {
-    setState((s) => {
-      const item = s.registry.find((r) => r.credentialId === credentialId);
-      if (!item) return s;
-      const at = new Date().toISOString();
-      return {
-        ...s,
-        registry: s.registry.map((r) =>
-          r.credentialId === credentialId
-            ? {
-                ...r,
-                isRevoked: revoked,
-                revocationReason: revoked ? reason || "Administrative revocation" : undefined,
-                revokedAt: revoked ? at : undefined,
-                revokedBy: revoked ? "Registrar's office" : undefined,
-              }
-            : r,
-        ),
-        events: [
-          { id: uid("ev"), at, credentialId, studentName: item.studentName, action: revoked ? "REVOKED" : "RESTORED", note: revoked ? reason : undefined },
-          ...s.events,
-        ],
-      };
-    });
-  }, []);
+  const walletIds = state.credentials.map((c) => c.id);
+  const statusQuery = useQuery({
+    queryKey: ["registry", "statuses", walletIds],
+    queryFn: () => fetchRevokedIds(walletIds),
+    staleTime: 15_000,
+  });
+  const revokedList = statusQuery.data;
+  const refetchStatuses = statusQuery.refetch;
 
   const recordCheck = useCallback((c: Omit<EmployerCheck, "id" | "at">, audit?: VerificationAuditEntry) => {
     setState((s) => ({
@@ -178,20 +122,20 @@ export function VeriCredProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<Store>(() => {
-    const revokedIds = new Set(state.registry.filter((r) => r.isRevoked).map((r) => r.credentialId));
+    const revokedIds = new Set(revokedList ?? []);
     return {
       ...state,
       revokedIds,
       incoming,
       sendToVerifier: setIncoming,
       clearIncoming: () => setIncoming(null),
-      issueCredential,
-      setRevoked,
+      addToWallet,
+      refreshStatuses: () => void refetchStatuses(),
       recordCheck,
       recordScan,
       resetDemo,
     };
-  }, [state, incoming, issueCredential, setRevoked, recordCheck, recordScan, resetDemo]);
+  }, [state, incoming, revokedList, refetchStatuses, addToWallet, recordCheck, recordScan, resetDemo]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
