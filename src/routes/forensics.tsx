@@ -283,6 +283,10 @@ function Finding({ a, n, active, onSelect }: { a: DocumentForgeryAnomaly; n: num
   );
 }
 
+function gradeLine(g: string) {
+  return /^\d/.test(g) ? `CGPA ${g.split(" ")[0]}` : g.replace(/\s*\(.*\)/, "");
+}
+
 function SpecimenCertificate({ report, specimen }: { report: ForgeryForensicReport | null; specimen: SpecimenDocument | null }) {
   // Elements sit at fixed percentages so the specimen findings' boxes land on them.
   const at = (x: number, y: number, w: number, h: number) => ({ left: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` });
@@ -303,7 +307,7 @@ function SpecimenCertificate({ report, specimen }: { report: ForgeryForensicRepo
       <p className="absolute text-center text-[4.6cqw] leading-none" style={at(15, 39, 70, 8)}>{report?.candidateNameDetected ?? "—"}</p>
       <p className="absolute text-center text-[2.6cqw] uppercase tracking-[0.14em]" style={at(15, 50, 70, 5)}>{degree}</p>
       <p className="absolute flex items-center justify-center text-center font-mono text-[2.1cqw]" style={at(42, 57, 22, 8)}>
-        CGPA {(report?.cgpaOrGradeDetected ?? "—").split(" ")[0]}
+        {gradeLine(report?.cgpaOrGradeDetected ?? "—")}
       </p>
       <p className="absolute flex items-center justify-center font-sans text-[1.8cqw] text-muted-foreground" style={at(36, 67, 32, 8)}>
         Awarded {report?.verdict === "SUSPICIOUS" ? "14 Mar 2026" : "20 Jul 2024"}
