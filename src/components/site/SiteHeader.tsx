@@ -14,8 +14,8 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/95 backdrop-blur-sm">
       <div className="border-b border-foreground/10">
         <Container className="flex h-8 items-center justify-between gap-4">
-          <p className="kicker truncate">Prototype · every record here is demo data</p>
-          <p className="kicker hidden shrink-0 sm:block">Team VOIDX · Seva 2026</p>
+          <p className="kicker truncate">Prototype · sample records included</p>
+          <p className="kicker hidden shrink-0 sm:block">Team VOIDX</p>
         </Container>
       </div>
       <Container className="flex h-16 items-center justify-between gap-8">

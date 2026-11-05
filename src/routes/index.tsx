@@ -95,8 +95,7 @@ function Home() {
         <div className="grid grid-cols-12 gap-x-4 md:gap-x-8 gap-y-16">
           <div className="col-span-12 min-w-0 animate-rise lg:col-span-7">
             <p className="kicker">
-              <span className="text-accent-ink">Seva Innovation Challenge 2026</span>
-              <span className="mx-2">—</span>Team VOIDX
+              <span className="text-accent-ink">Team VOIDX</span>
             </p>
             <h1 className="mt-6 text-5xl leading-[1.02] sm:text-6xl xl:text-[5.25rem]">
               A degree anyone can check in seconds. <span className="italic text-muted-foreground">A marksheet</span>{" "}

@@ -5,7 +5,6 @@ export const NAV_ITEMS = [
   { to: "/forensics", label: "Forgery lab", hint: "AI review of an uploaded scan" },
   { to: "/issuer", label: "University", hint: "Issue and revoke credentials" },
   { to: "/explainer", label: "How it works", hint: "The technology, plainly" },
-  { to: "/pitch", label: "Pitch", hint: "Team VOIDX deck" },
 ] as const;
 
 export type NavPath = (typeof NAV_ITEMS)[number]["to"];

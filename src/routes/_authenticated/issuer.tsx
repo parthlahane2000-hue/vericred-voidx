@@ -15,7 +15,7 @@ import type { RevocationRegistryItem, W3CVerifiableCredential } from "@/lib/veri
 import { buildCredential, validateIssueForm, type IssueFormState } from "@/lib/vericred/issue";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/issuer")({
+export const Route = createFileRoute("/_authenticated/issuer")({
   head: () => ({
     meta: [
       { title: "University portal — VeriCred" },

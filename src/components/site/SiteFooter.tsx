@@ -38,7 +38,7 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="mt-16 flex flex-col gap-4 border-t border-primary-foreground/20 pt-6 text-xs text-primary-foreground/60 md:flex-row md:justify-between">
-          <p>VeriCred, by Team VOIDX for the Seva Innovation Challenge 2026.</p>
+          <p>VeriCred, by Team VOIDX.</p>
           <p className="max-w-xl md:text-right">
             Demo records only. There's no live DigiLocker connection and no blockchain transaction; proofs are a
             hash-based simulation.
