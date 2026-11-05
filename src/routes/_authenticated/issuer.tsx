@@ -143,12 +143,7 @@ function IssuerPortal({ userId, email }: { userId: string; email: string }) {
           </>
         }
         dek="Every credential gets a signature and a slot on the revocation list. Flip that slot and every future employer check sees it."
-        actions={
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="datum text-muted-foreground">{email}</span>
-            <SignOutButton />
-          </div>
-        }
+
         aside={
           <dl className="grid grid-cols-3 gap-6 border-t border-border pt-4">
             <div>
@@ -168,6 +163,10 @@ function IssuerPortal({ userId, email }: { userId: string; email: string }) {
       />
 
       <Container>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-y border-border py-3">
+          <span className="datum min-w-0 text-muted-foreground">Signed in as {email}</span>
+          <SignOutButton />
+        </div>
         <div role="tablist" aria-label="Portal sections" className="flex flex-wrap gap-x-4 md:gap-x-8 gap-y-2 border-b border-border">
           {(
             [
