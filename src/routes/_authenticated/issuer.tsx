@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Paperclip, Search } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { LogOut, Paperclip, Search } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
@@ -10,6 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDateTime } from "@/lib/vericred/format";
+import { supabase } from "@/integrations/supabase/client";
+import { checkIsIssuer, issueToRegistry, listEvents, listRegistry, setRevokedInRegistry } from "@/lib/vericred/registry";
 import { useVeriCred } from "@/lib/vericred/store";
 import type { RevocationRegistryItem, W3CVerifiableCredential } from "@/lib/vericred/types";
 import { buildCredential, validateIssueForm, type IssueFormState } from "@/lib/vericred/issue";
@@ -22,6 +25,8 @@ export const Route = createFileRoute("/_authenticated/issuer")({
       { name: "description", content: "Issue signed academic credentials, search the registry and revoke a record with a stated reason." },
       { property: "og:title", content: "University portal — VeriCred" },
       { property: "og:description", content: "Issue it once. Revoke it the same day if you have to." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: IssuerPage,
@@ -43,7 +48,78 @@ const EMPTY: IssueFormState = {
 type FormState = IssueFormState;
 
 function IssuerPage() {
-  const { credentials, registry, events, issueCredential, setRevoked } = useVeriCred();
+  const { user } = Route.useRouteContext();
+  const role = useQuery({ queryKey: ["issuer-role", user.id], queryFn: () => checkIsIssuer(user.id) });
+
+  if (role.isPending) {
+    return (
+      <Container className="py-24">
+        <p className="kicker">Checking your access…</p>
+      </Container>
+    );
+  }
+  if (!role.data) {
+    return (
+      <Container className="py-24">
+        <SectionLabel>University portal</SectionLabel>
+        <h1 className="mt-4 max-w-2xl text-5xl leading-tight">Your account is waiting for approval.</h1>
+        <p className="mt-6 max-w-md text-muted-foreground">
+          Signed in as {user.email}. The registrar has to approve staff accounts before they can issue or revoke credentials.
+        </p>
+        <div className="mt-8">
+          <SignOutButton />
+        </div>
+      </Container>
+    );
+  }
+  return <IssuerPortal userId={user.id} email={user.email ?? ""} />;
+}
+
+function SignOutButton() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  return (
+    <Button
+      variant="outline"
+      onClick={async () => {
+        await queryClient.cancelQueries();
+        queryClient.clear();
+        await supabase.auth.signOut();
+        void navigate({ to: "/auth", replace: true });
+      }}
+    >
+      <LogOut className="size-4" />
+      Sign out
+    </Button>
+  );
+}
+
+function IssuerPortal({ userId, email }: { userId: string; email: string }) {
+  const { addToWallet, refreshStatuses } = useVeriCred();
+  const queryClient = useQueryClient();
+  const registryQuery = useQuery({ queryKey: ["registry", "list"], queryFn: listRegistry });
+  const eventsQuery = useQuery({ queryKey: ["registry", "events"], queryFn: listEvents });
+  const registry = registryQuery.data ?? [];
+  const events = eventsQuery.data ?? [];
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: ["registry"] });
+    refreshStatuses();
+  };
+  const issue = useMutation({
+    mutationFn: (c: W3CVerifiableCredential) => issueToRegistry(c, userId),
+    onSuccess: (_d, c) => {
+      addToWallet(c);
+      refresh();
+      toast.success(`Issued to ${c.credentialSubject.studentName}. It's now in the registry and the student wallet.`);
+      setTab("registry");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  const revoke = useMutation({
+    mutationFn: (v: { id: string; revoked: boolean; reason?: string }) => setRevokedInRegistry(v.id, v.revoked, v.reason),
+    onSuccess: refresh,
+    onError: (e) => toast.error((e as Error).message),
+  });
   const [tab, setTab] = useState<Tab>("registry");
   const [query, setQuery] = useState("");
   const [revoking, setRevoking] = useState<RevocationRegistryItem | null>(null);
@@ -67,6 +143,12 @@ function IssuerPage() {
           </>
         }
         dek="Every credential gets a signature and a slot on the revocation list. Flip that slot and every future employer check sees it."
+        actions={
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="datum text-muted-foreground">{email}</span>
+            <SignOutButton />
+          </div>
+        }
         aside={
           <dl className="grid grid-cols-3 gap-6 border-t border-border pt-4">
             <div>
@@ -158,8 +240,10 @@ function IssuerPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              setRevoked(r.credentialId, false);
-                              toast.success(`Restored ${r.studentName}'s credential.`);
+                              revoke.mutate(
+                                { id: r.credentialId, revoked: false },
+                                { onSuccess: () => toast.success(`Restored ${r.studentName}'s credential.`) },
+                              );
                             }}
                           >
                             Restore
@@ -172,10 +256,17 @@ function IssuerPage() {
                       </td>
                     </tr>
                   ))}
-                  {rows.length === 0 && (
+                  {registryQuery.isPending && (
                     <tr>
                       <td colSpan={6} className="py-10 text-center text-muted-foreground">
-                        Nothing matches “{query}”.
+                        Loading the registry…
+                      </td>
+                    </tr>
+                  )}
+                  {!registryQuery.isPending && rows.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-10 text-center text-muted-foreground">
+                        {query ? <>Nothing matches “{query}”.</> : "No credentials issued yet."}
                       </td>
                     </tr>
                   )}
@@ -187,12 +278,9 @@ function IssuerPage() {
 
         {tab === "issue" && (
           <IssueForm
-            nextIndex={200 + credentials.length}
-            onIssue={(c) => {
-              issueCredential(c);
-              toast.success(`Issued to ${c.credentialSubject.studentName}. It's now in the student wallet.`);
-              setTab("registry");
-            }}
+            nextIndex={200 + registry.length}
+            busy={issue.isPending}
+            onIssue={(c) => issue.mutate(c)}
           />
         )}
 
@@ -219,9 +307,9 @@ function IssuerPage() {
           </section>
         )}
 
-        <Notice title="Simulated registry" className="mt-16 max-w-3xl">
-          Signing and the status list run in this browser. The design is ready for a blockchain anchor, but no
-          transaction is written here.
+        <Notice title="Simulated signatures" className="mt-16 max-w-3xl">
+          Records and revocations are saved to the live registry database. The signatures themselves are a hash-based
+          simulation, and no blockchain transaction is written.
         </Notice>
       </Container>
 
@@ -230,8 +318,11 @@ function IssuerPage() {
         onClose={() => setRevoking(null)}
         onConfirm={(reason) => {
           if (!revoking) return;
-          setRevoked(revoking.credentialId, true, reason);
-          toast(`Revoked ${revoking.studentName}'s credential.`);
+          const item = revoking;
+          revoke.mutate(
+            { id: item.credentialId, revoked: true, reason },
+            { onSuccess: () => toast(`Revoked ${item.studentName}'s credential.`) },
+          );
           setRevoking(null);
         }}
       />
@@ -239,11 +330,10 @@ function IssuerPage() {
   );
 }
 
-function IssueForm({ nextIndex, onIssue }: { nextIndex: number; onIssue: (c: W3CVerifiableCredential) => void }) {
+function IssueForm({ nextIndex, busy, onIssue }: { nextIndex: number; busy: boolean; onIssue: (c: W3CVerifiableCredential) => void }) {
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [attachment, setAttachment] = useState<string>("");
-  const [busy, setBusy] = useState(false);
 
   const preview = useMemo(() => {
     const ok = Object.keys(validateIssueForm(form)).length === 0;
@@ -257,11 +347,7 @@ function IssueForm({ nextIndex, onIssue }: { nextIndex: number; onIssue: (c: W3C
     const errs = validateIssueForm(form);
     setErrors(errs);
     if (Object.keys(errs).length) return;
-    setBusy(true);
-    setTimeout(() => {
-      onIssue(buildCredential(form, nextIndex));
-      setBusy(false);
-    }, 500);
+    onIssue(buildCredential(form, nextIndex));
   };
 
   const field = (k: keyof FormState, label: string, opts: { span?: string; inputMode?: "decimal" | "numeric" } = {}) => (

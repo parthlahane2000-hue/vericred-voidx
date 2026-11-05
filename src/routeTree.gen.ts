@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CrossVerifyRouteImport } from './routes/cross-verify'
 import { Route as ExplainerRouteImport } from './routes/explainer'
 import { Route as ForensicsRouteImport } from './routes/forensics'
@@ -20,6 +22,15 @@ import { Route as AuthenticatedIssuerRouteImport } from './routes/_authenticated
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CrossVerifyRoute = CrossVerifyRouteImport.update({
@@ -48,13 +59,14 @@ const WalletRoute = WalletRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIssuerRoute = AuthenticatedIssuerRouteImport.update({
-  id: '/_authenticated/issuer',
+  id: '/issuer',
   path: '/issuer',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/cross-verify': typeof CrossVerifyRoute
   '/explainer': typeof ExplainerRoute
   '/forensics': typeof ForensicsRoute
@@ -64,6 +76,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/cross-verify': typeof CrossVerifyRoute
   '/explainer': typeof ExplainerRoute
   '/forensics': typeof ForensicsRoute
@@ -74,6 +87,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/cross-verify': typeof CrossVerifyRoute
   '/explainer': typeof ExplainerRoute
   '/forensics': typeof ForensicsRoute
@@ -85,6 +100,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/cross-verify'
     | '/explainer'
     | '/forensics'
@@ -94,6 +110,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/cross-verify'
     | '/explainer'
     | '/forensics'
@@ -103,6 +120,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
+    | '/auth'
     | '/cross-verify'
     | '/explainer'
     | '/forensics'
@@ -113,12 +132,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   CrossVerifyRoute: typeof CrossVerifyRoute
   ExplainerRoute: typeof ExplainerRoute
   ForensicsRoute: typeof ForensicsRoute
   VerifyRoute: typeof VerifyRoute
   WalletRoute: typeof WalletRoute
-  AuthenticatedIssuerRoute: typeof AuthenticatedIssuerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -128,6 +148,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cross-verify': {
@@ -170,19 +204,31 @@ declare module '@tanstack/react-router' {
       path: '/issuer'
       fullPath: '/issuer'
       preLoaderRoute: typeof AuthenticatedIssuerRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedIssuerRoute: typeof AuthenticatedIssuerRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedIssuerRoute: AuthenticatedIssuerRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   CrossVerifyRoute: CrossVerifyRoute,
   ExplainerRoute: ExplainerRoute,
   ForensicsRoute: ForensicsRoute,
   VerifyRoute: VerifyRoute,
   WalletRoute: WalletRoute,
-  AuthenticatedIssuerRoute: AuthenticatedIssuerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
