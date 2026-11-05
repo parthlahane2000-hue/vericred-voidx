@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CrossVerifyRouteImport } from './routes/cross-verify'
+import { Route as ExplainerRouteImport } from './routes/explainer'
+import { Route as ForensicsRouteImport } from './routes/forensics'
+import { Route as IssuerRouteImport } from './routes/issuer'
+import { Route as PitchRouteImport } from './routes/pitch'
+import { Route as VerifyRouteImport } from './routes/verify'
+import { Route as WalletRouteImport } from './routes/wallet'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CrossVerifyRoute = CrossVerifyRouteImport.update({
+  id: '/cross-verify',
+  path: '/cross-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExplainerRoute = ExplainerRouteImport.update({
+  id: '/explainer',
+  path: '/explainer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForensicsRoute = ForensicsRouteImport.update({
+  id: '/forensics',
+  path: '/forensics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IssuerRoute = IssuerRouteImport.update({
+  id: '/issuer',
+  path: '/issuer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PitchRoute = PitchRouteImport.update({
+  id: '/pitch',
+  path: '/pitch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyRoute = VerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WalletRoute = WalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cross-verify': typeof CrossVerifyRoute
+  '/explainer': typeof ExplainerRoute
+  '/forensics': typeof ForensicsRoute
+  '/issuer': typeof IssuerRoute
+  '/pitch': typeof PitchRoute
+  '/verify': typeof VerifyRoute
+  '/wallet': typeof WalletRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cross-verify': typeof CrossVerifyRoute
+  '/explainer': typeof ExplainerRoute
+  '/forensics': typeof ForensicsRoute
+  '/issuer': typeof IssuerRoute
+  '/pitch': typeof PitchRoute
+  '/verify': typeof VerifyRoute
+  '/wallet': typeof WalletRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cross-verify': typeof CrossVerifyRoute
+  '/explainer': typeof ExplainerRoute
+  '/forensics': typeof ForensicsRoute
+  '/issuer': typeof IssuerRoute
+  '/pitch': typeof PitchRoute
+  '/verify': typeof VerifyRoute
+  '/wallet': typeof WalletRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/cross-verify'
+    | '/explainer'
+    | '/forensics'
+    | '/issuer'
+    | '/pitch'
+    | '/verify'
+    | '/wallet'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/cross-verify'
+    | '/explainer'
+    | '/forensics'
+    | '/issuer'
+    | '/pitch'
+    | '/verify'
+    | '/wallet'
+  id:
+    | '__root__'
+    | '/'
+    | '/cross-verify'
+    | '/explainer'
+    | '/forensics'
+    | '/issuer'
+    | '/pitch'
+    | '/verify'
+    | '/wallet'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CrossVerifyRoute: typeof CrossVerifyRoute
+  ExplainerRoute: typeof ExplainerRoute
+  ForensicsRoute: typeof ForensicsRoute
+  IssuerRoute: typeof IssuerRoute
+  PitchRoute: typeof PitchRoute
+  VerifyRoute: typeof VerifyRoute
+  WalletRoute: typeof WalletRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +143,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cross-verify': {
+      id: '/cross-verify'
+      path: '/cross-verify'
+      fullPath: '/cross-verify'
+      preLoaderRoute: typeof CrossVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explainer': {
+      id: '/explainer'
+      path: '/explainer'
+      fullPath: '/explainer'
+      preLoaderRoute: typeof ExplainerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forensics': {
+      id: '/forensics'
+      path: '/forensics'
+      fullPath: '/forensics'
+      preLoaderRoute: typeof ForensicsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/issuer': {
+      id: '/issuer'
+      path: '/issuer'
+      fullPath: '/issuer'
+      preLoaderRoute: typeof IssuerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pitch': {
+      id: '/pitch'
+      path: '/pitch'
+      fullPath: '/pitch'
+      preLoaderRoute: typeof PitchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify': {
+      id: '/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof VerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wallet': {
+      id: '/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CrossVerifyRoute: CrossVerifyRoute,
+  ExplainerRoute: ExplainerRoute,
+  ForensicsRoute: ForensicsRoute,
+  IssuerRoute: IssuerRoute,
+  PitchRoute: PitchRoute,
+  VerifyRoute: VerifyRoute,
+  WalletRoute: WalletRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

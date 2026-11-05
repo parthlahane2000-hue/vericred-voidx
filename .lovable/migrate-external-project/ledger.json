@@ -1,0 +1,19 @@
+{
+  "source": "code-archive (Google AI Studio export: VeriCred ZK)",
+  "capabilities": [
+    { "capability": "code", "source": "React SPA with tab switcher (App.tsx + 7 views)", "outcome": "migrate", "status": "in_progress", "next_action": "Rebuild each view as its own page with a new editorial design" },
+    { "capability": "schema", "source": "none (in-memory TypeScript data only)", "outcome": "not_applicable", "status": "verified", "next_action": "None — source had no database" },
+    { "capability": "records", "source": "bundled demo data in mockCredentials.ts", "outcome": "migrate", "status": "in_progress", "next_action": "Carry over demo credentials, registry and specimens as labelled demo data" },
+    { "capability": "auth identities", "source": "none", "outcome": "not_applicable", "status": "verified", "next_action": "None — source had no sign-in" },
+    { "capability": "authorization", "source": "none (role views are open demo screens)", "outcome": "not_applicable", "status": "verified", "next_action": "None" },
+    { "capability": "uploaded file bytes", "source": "browser FileReader only, nothing stored", "outcome": "not_applicable", "status": "verified", "next_action": "None" },
+    { "capability": "AI forgery analysis", "source": "Express /api/forensics/analyze calling Gemini (gemini-3.8-flash) with GEMINI_API_KEY", "outcome": "migrate to server function using Lovable AI with the same Gemini model; no user key needed", "status": "in_progress", "next_action": "Implement and test one real image analysis" },
+    { "capability": "revocation API", "source": "Express in-memory /api/revocation/list and /toggle (state lost on restart, client ignored responses)", "outcome": "replace with client-side registry that persists in the browser", "status": "in_progress", "next_action": "Verify revoke/restore updates wallet and employer checks" },
+    { "capability": "public endpoints / webhooks / schedules", "source": "none beyond the app-internal routes above", "outcome": "not_applicable", "status": "verified", "next_action": "None" },
+    { "capability": "secrets", "source": "GEMINI_API_KEY", "outcome": "not needed after move to Lovable AI", "status": "verified", "next_action": "None" },
+    { "capability": "pitch deck PDF", "source": "public/assets/aistudio/SEVA_INNOVATION_VOIDX_1e2be96a.pdf", "outcome": "migrate as hosted asset", "status": "verified", "next_action": "None" },
+    { "capability": "tests", "source": "src/utils/zkp.test.ts (node:test)", "outcome": "port to vitest", "status": "in_progress", "next_action": "Run tests" },
+    { "capability": "cutover", "source": "AI Studio hosted app", "outcome": "publish from Lovable when ready", "status": "pending", "next_action": "User publishes" },
+    { "capability": "verification", "source": "-", "outcome": "browser check of every page", "status": "in_progress", "next_action": "Run Playwright checks" }
+  ]
+}
