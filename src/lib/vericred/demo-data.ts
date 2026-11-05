@@ -393,7 +393,7 @@ export const SAMPLE_SPECIMENS: SpecimenDocument[] = [
         qrDigiLockerChecksumMatch: true,
         revocationRegistryClear: true,
       },
-      recommendation: 'VERIFIED. Proceed with employment offer or background clearance.',
+      recommendation: 'Nothing stands out. You can still confirm with the issuer for a final check.',
     },
   },
   {
@@ -409,7 +409,7 @@ export const SAMPLE_SPECIMENS: SpecimenDocument[] = [
       fileName: 'Mumbai_Univ_BSc_Tampered_CGPA.pdf',
       verdict: 'HIGH_RISK_FORGERY',
       confidenceScore: 12,
-      summary: 'CRITICAL FRAUD DETECTED. Digital forensics identified pixel interpolation and font rasterization inconsistencies where "9.20 CGPA" was pasted over original text. The university seal is a blurred digital overlay with no microscopic guilloche pattern.',
+      summary: 'The "9.20" in the CGPA field was pasted over the original text: its pixels and spacing don\'t match the rest of the line. The seal is a blurred digital overlay without the fine security pattern of a real one.',
       institutionDetected: 'University of Mumbai',
       candidateNameDetected: 'Rajesh K. Verma',
       cgpaOrGradeDetected: '9.20 (Tampered from original 5.40)',
@@ -458,7 +458,7 @@ export const SAMPLE_SPECIMENS: SpecimenDocument[] = [
         qrDigiLockerChecksumMatch: false,
         revocationRegistryClear: false,
       },
-      recommendation: 'REJECT & REPORT. Forward to legal/academic integrity board. Document fails cryptographic and forensic authenticity.',
+      recommendation: 'Don\'t accept this document. Ask the University of Mumbai to confirm the record, and refer it to your integrity team.',
     },
   },
   {
@@ -507,7 +507,7 @@ export const SAMPLE_SPECIMENS: SpecimenDocument[] = [
         qrDigiLockerChecksumMatch: false,
         revocationRegistryClear: true,
       },
-      recommendation: 'FLAGGED. Do not clear candidate without original cryptographic credential re-issuance.',
+      recommendation: 'Hold the check until the candidate shares the signed credential directly from NSDC.',
     },
   },
 ];

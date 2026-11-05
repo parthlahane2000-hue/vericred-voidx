@@ -312,11 +312,11 @@ function SpecimenCertificate({ report, specimen }: { report: ForgeryForensicRepo
       <p className="absolute flex items-center justify-center font-sans text-[1.8cqw] text-muted-foreground" style={at(36, 67, 32, 8)}>
         Awarded {report?.verdict === "SUSPICIOUS" ? "14 Mar 2026" : "20 Jul 2024"}
       </p>
-      <div className="absolute flex flex-col items-center justify-end text-center" style={at(12, 79, 26, 13)}>
+      <div className="absolute flex flex-col items-center justify-end text-center" style={at(12, 79, 26, 11)}>
         <p className="text-[2.4cqw] italic">R. Sengupta</p>
         <p className="mt-[0.6cqw] w-full border-t border-foreground/40 pt-[0.6cqw] font-sans text-[1.7cqw]">Registrar</p>
       </div>
-      <div className="absolute flex flex-col items-center justify-end text-center" style={at(44, 79, 24, 13)}>
+      <div className="absolute flex flex-col items-center justify-end text-center" style={at(44, 79, 24, 11)}>
         <p className="text-[2.4cqw] italic">V. K. Murthy</p>
         <p className="mt-[0.6cqw] w-full border-t border-foreground/40 pt-[0.6cqw] font-sans text-[1.7cqw]">Vice-Chancellor</p>
       </div>
