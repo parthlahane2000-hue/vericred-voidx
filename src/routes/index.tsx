@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { useMemo } from "react";
@@ -7,6 +8,7 @@ import { NAV_ITEMS } from "@/components/site/nav";
 import { Container, SectionLabel, StatusMark } from "@/components/site/primitives";
 import { CredentialSlip } from "@/components/vericred/CredentialSlip";
 import { Button } from "@/components/ui/button";
+import { fetchRegistryCounts } from "@/lib/vericred/registry";
 import { useVeriCred } from "@/lib/vericred/store";
 
 export const Route = createFileRoute("/")({
@@ -63,7 +65,8 @@ const DEMO_MONTHS = [
 ];
 
 function Home() {
-  const { credentials, registry, revokedIds, checks, scans } = useVeriCred();
+  const { credentials, revokedIds, checks, scans } = useVeriCred();
+  const { data: counts } = useQuery({ queryKey: ["registry", "counts"], queryFn: fetchRegistryCounts, staleTime: 15_000 });
 
   const stats = useMemo(() => {
     // Passed checks are written into each credential's history; failed ones only live in the check log.
@@ -72,14 +75,14 @@ function Home() {
     const totalChecks = passed + failed;
     const passRate = totalChecks ? Math.round((passed / totalChecks) * 100) : 0;
     return {
-      issued: credentials.length,
-      active: registry.filter((r) => !r.isRevoked).length,
-      revoked: registry.filter((r) => r.isRevoked).length,
+      issued: counts?.total ?? "—",
+      active: counts ? counts.total - counts.revoked : "—",
+      revoked: counts?.revoked ?? "—",
       totalChecks,
       passRate,
       flagged: scans.filter((s) => s.verdict !== "VERIFIED_AUTHENTIC").length,
     };
-  }, [credentials, registry, checks, scans]);
+  }, [credentials, counts, checks, scans]);
 
   const chartData = DEMO_MONTHS.map((d, i) => (i === DEMO_MONTHS.length - 1 ? { ...d, v: d.v + checks.length } : d));
   const featured = credentials.slice(0, 3);
