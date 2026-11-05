@@ -14,16 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      issued_credentials: {
+        Row: {
+          created_at: string
+          credential_id: string
+          degree_name: string
+          doc_id: string
+          document: Json
+          is_revoked: boolean
+          issued_by: string | null
+          issuer_did: string
+          issuer_name: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status_list_index: number
+          student_name: string
+        }
+        Insert: {
+          created_at?: string
+          credential_id: string
+          degree_name: string
+          doc_id: string
+          document: Json
+          is_revoked?: boolean
+          issued_by?: string | null
+          issuer_did: string
+          issuer_name: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status_list_index?: number
+          student_name: string
+        }
+        Update: {
+          created_at?: string
+          credential_id?: string
+          degree_name?: string
+          doc_id?: string
+          document?: Json
+          is_revoked?: boolean
+          issued_by?: string | null
+          issuer_did?: string
+          issuer_name?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status_list_index?: number
+          student_name?: string
+        }
+        Relationships: []
+      }
+      registry_events: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string
+          credential_id: string
+          id: string
+          note: string | null
+          student_name: string
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string
+          credential_id: string
+          id?: string
+          note?: string | null
+          student_name: string
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string
+          credential_id?: string
+          id?: string
+          note?: string | null
+          student_name?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      credential_statuses: {
+        Args: { _ids: string[] }
+        Returns: {
+          credential_id: string
+          is_revoked: boolean
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      lookup_credential: { Args: { _ref: string }; Returns: Json }
+      registry_counts: {
+        Args: never
+        Returns: {
+          revoked: number
+          total: number
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "issuer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +272,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["issuer"],
+    },
   },
 } as const
