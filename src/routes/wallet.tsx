@@ -178,6 +178,7 @@ function CredentialDocument({
       <p className="mt-2 text-muted-foreground">{s.major}</p>
 
       <dl className="mt-8 grid grid-cols-2 gap-x-4 md:gap-x-8 gap-y-6 border-t border-border pt-6 sm:grid-cols-4">
+        <Field label="Awarded to">{s.studentName}</Field>
         <Field label="Graduated">{s.graduationYear}</Field>
         <Field label="CGPA · only you">
           {s.cgpa.toFixed(2)} <span className="text-muted-foreground">/ {s.cgpaScale}</span>
