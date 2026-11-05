@@ -31,7 +31,10 @@ use the editor.
 
 ## Project rules (VeriCred)
 
-- App state (credentials, revocation registry, audit events, employer checks, scans) lives in one React context in `src/lib/vericred/store.tsx`, persisted to localStorage after mount — keeps every page consistent without a backend and avoids hydration mismatches.
+- Issued credentials, revocation state and the audit log live in the database (`issued_credentials`, `registry_events`); all access goes through `src/lib/vericred/registry.ts` — one source of truth that employers and staff share.
+- Public reads use only the exact-match RPCs (`lookup_credential`, `credential_statuses`, `registry_counts`); the tables are readable/writable only by users with the `issuer` role, and a trigger writes the audit log and blocks edits other than revoke/restore — prevents enumeration and tampering.
+- The first account ever created becomes an issuer (bootstrap trigger); later staff need a `user_roles` row added by hand — no self-service escalation.
+- Wallet copies, employer checks and scans stay in the browser context in `src/lib/vericred/store.tsx` (localStorage after mount), with revoked status fetched live from the database — avoids hydration mismatches.
 - Verification outcomes are decided only by `verifyPresentation` / `verifyByReference` in `src/lib/vericred/verify.ts`, with tests beside it — one source of truth for Verified / Invalid signature / Revoked / Expired / Failed.
 - Proofs and signatures are a labelled hash-based simulation (`zkp.ts`); UI must keep the "simulated" notices — the brief forbids claiming real cryptography, DigiLocker or blockchain calls.
 - AI document review runs only in `forensics.server.ts` behind the `analyseScan` server function, and results are always shown as preliminary — keeps prompts server-side and avoids presenting AI output as proof.

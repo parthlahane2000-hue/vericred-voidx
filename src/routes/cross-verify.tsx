@@ -44,7 +44,7 @@ const DECISION = {
 };
 
 function CrossVerifyPage() {
-  const { credentials, registry } = useVeriCred();
+  const { credentials, revokedIds } = useVeriCred();
   const [busy, setBusy] = useState(false);
   const [report, setReport] = useState<Report | null>(null);
   const [active, setActive] = useState<string | null>(null);
@@ -52,7 +52,7 @@ function CrossVerifyPage() {
   const [form, setForm] = useState({ name: "Aarav Sharma", roll: "2020CS1044", degree: "Bachelor of Technology (B.Tech)", cgpa: "8.92" });
   const [formError, setFormError] = useState<string | null>(null);
 
-  const isRevoked = (id: string) => registry.find((r) => r.credentialId === id)?.isRevoked ?? false;
+  const isRevoked = (id: string) => revokedIds.has(id);
 
   const run = (build: () => Report) => {
     setBusy(true);
