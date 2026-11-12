@@ -1,5 +1,6 @@
 export const NAV_ITEMS = [
   { to: "/student", label: "Student portal", hint: "Your issued credentials and proof downloads" },
+  { to: "/apply", label: "Apply", hint: "Send your transcript and get a preliminary ID" },
   { to: "/wallet", label: "Wallet", hint: "Student credentials and proofs" },
   { to: "/verify", label: "Employer", hint: "Check a proof or credential ID" },
   { to: "/cross-verify", label: "Cross-check", hint: "Compare a document with the record" },

@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      credential_applications: {
+        Row: {
+          applicant_email: string
+          applicant_id: string
+          cgpa: number
+          created_at: string
+          degree_name: string
+          graduation_year: number
+          id: string
+          institution_name: string
+          major: string
+          preliminary_id: string
+          reviewed_at: string | null
+          reviewer_note: string | null
+          roll_no: string
+          status: string
+          student_name: string
+          transcript_name: string
+          transcript_path: string
+        }
+        Insert: {
+          applicant_email: string
+          applicant_id?: string
+          cgpa: number
+          created_at?: string
+          degree_name: string
+          graduation_year: number
+          id?: string
+          institution_name: string
+          major: string
+          preliminary_id?: string
+          reviewed_at?: string | null
+          reviewer_note?: string | null
+          roll_no: string
+          status?: string
+          student_name: string
+          transcript_name: string
+          transcript_path: string
+        }
+        Update: {
+          applicant_email?: string
+          applicant_id?: string
+          cgpa?: number
+          created_at?: string
+          degree_name?: string
+          graduation_year?: number
+          id?: string
+          institution_name?: string
+          major?: string
+          preliminary_id?: string
+          reviewed_at?: string | null
+          reviewer_note?: string | null
+          roll_no?: string
+          status?: string
+          student_name?: string
+          transcript_name?: string
+          transcript_path?: string
+        }
+        Relationships: []
+      }
       issued_credentials: {
         Row: {
           created_at: string

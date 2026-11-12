@@ -17,6 +17,7 @@ import { Route as ExplainerRouteImport } from './routes/explainer'
 import { Route as ForensicsRouteImport } from './routes/forensics'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as AuthenticatedApplyRouteImport } from './routes/_authenticated/apply'
 import { Route as AuthenticatedIssuerRouteImport } from './routes/_authenticated/issuer'
 import { Route as AuthenticatedStudentRouteImport } from './routes/_authenticated/student'
 
@@ -59,6 +60,11 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedApplyRoute = AuthenticatedApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedIssuerRoute = AuthenticatedIssuerRouteImport.update({
   id: '/issuer',
   path: '/issuer',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/forensics': typeof ForensicsRoute
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
+  '/apply': typeof AuthenticatedApplyRoute
   '/issuer': typeof AuthenticatedIssuerRoute
   '/student': typeof AuthenticatedStudentRoute
 }
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/forensics': typeof ForensicsRoute
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
+  '/apply': typeof AuthenticatedApplyRoute
   '/issuer': typeof AuthenticatedIssuerRoute
   '/student': typeof AuthenticatedStudentRoute
 }
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/forensics': typeof ForensicsRoute
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
+  '/_authenticated/apply': typeof AuthenticatedApplyRoute
   '/_authenticated/issuer': typeof AuthenticatedIssuerRoute
   '/_authenticated/student': typeof AuthenticatedStudentRoute
 }
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/forensics'
     | '/verify'
     | '/wallet'
+    | '/apply'
     | '/issuer'
     | '/student'
   fileRoutesByTo: FileRoutesByTo
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/forensics'
     | '/verify'
     | '/wallet'
+    | '/apply'
     | '/issuer'
     | '/student'
   id:
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/forensics'
     | '/verify'
     | '/wallet'
+    | '/_authenticated/apply'
     | '/_authenticated/issuer'
     | '/_authenticated/student'
   fileRoutesById: FileRoutesById
@@ -211,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/apply': {
+      id: '/_authenticated/apply'
+      path: '/apply'
+      fullPath: '/apply'
+      preLoaderRoute: typeof AuthenticatedApplyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/issuer': {
       id: '/_authenticated/issuer'
       path: '/issuer'
@@ -229,11 +248,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedApplyRoute: typeof AuthenticatedApplyRoute
   AuthenticatedIssuerRoute: typeof AuthenticatedIssuerRoute
   AuthenticatedStudentRoute: typeof AuthenticatedStudentRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedApplyRoute: AuthenticatedApplyRoute,
   AuthenticatedIssuerRoute: AuthenticatedIssuerRoute,
   AuthenticatedStudentRoute: AuthenticatedStudentRoute,
 }

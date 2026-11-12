@@ -17,6 +17,7 @@ import { useVeriCred } from "@/lib/vericred/store";
 import type { RevocationRegistryItem, W3CVerifiableCredential } from "@/lib/vericred/types";
 import { buildCredential, validateIssueForm, type IssueFormState } from "@/lib/vericred/issue";
 import { cn } from "@/lib/utils";
+import { ApplicationsReview } from "@/components/vericred/ApplicationsReview";
 
 export const Route = createFileRoute("/_authenticated/issuer")({
   head: () => ({
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/issuer")({
   component: IssuerPage,
 });
 
-type Tab = "registry" | "issue" | "log";
+type Tab = "registry" | "applications" | "issue" | "log";
 
 const EMPTY: IssueFormState = {
   studentName: "Priya N. Sundaram",
@@ -172,6 +173,7 @@ function IssuerPortal({ userId, email }: { userId: string; email: string }) {
           {(
             [
               ["registry", "Registry"],
+              ["applications", "Applications"],
               ["issue", "Issue a credential"],
               ["log", "Audit log"],
             ] as const
@@ -283,6 +285,7 @@ function IssuerPortal({ userId, email }: { userId: string; email: string }) {
             onIssue={(credential, email) => issue.mutate({ credential, email })}
           />
         )}
+        {tab === "applications" && <ApplicationsReview />}
 
         {tab === "log" && (
           <section className="mt-10">
